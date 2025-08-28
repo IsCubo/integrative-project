@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registration Successful — EventSync Pro</title>
+    <link rel="stylesheet" href="../css/style.css">
+  </head>
+  <body>
+    <main class="success-page">
+      <section class="success-card panel">
+        <h2 class="panel-title">Registration Successful</h2>
+        <p class="panel-desc">Your QR code was generated. Show it at entry or download it for later use.</p>
+
+        <div class="success-grid">
+          <div class="success-qr">
+            <!-- Aquí se mostrará la imagen del QR generada por JS -->
+            <img id="qrImage" alt="QR code" src="" width="240" height="240">
+            <div class="qr-actions">
+              <a id="downloadQr" class="btn btn-outline" download="eventsync-qr.png">Download QR</a>
+              <a href="/app/pages/login.html" class="btn">Return to Login</a>
+            </div>
+          </div>
+
+          <div class="success-info">
+            <h4 class="feature-title">Attendee details</h4>
+            <ul id="attendeeData" class="data-list">
+              <!-- JS completará estos datos -->
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app/js/register.js"></script>
+  </body>
+</html>

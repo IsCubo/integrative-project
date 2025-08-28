@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Home - EventSync Pro</title>
+    <link rel="stylesheet" href="../css/style.css">
+  </head>
+  <body>
+    <main class="login-container">
+      <div class="login-form-card">
+        <h1 class="login-title">Dashboard</h1>
+        <p class="login-subtitle">You have accessed the protected area.</p>
+        <p>Home content goes here.</p>
+        <div class="centered">
+          <button id="logoutBtn" class="login-button">Log out</button>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      document.getElementById('logoutBtn').addEventListener('click', function(){
+        localStorage.removeItem('user');
+        window.location.href = '../../index.html';
+      });
+
+      // Opcional: si no hay user en localStorage, redirigir a login
+      (function(){
+        try{
+          const u = localStorage.getItem('user');
+          if(!u) window.location.replace('../../index.html');
+        }catch(e){ window.location.replace('../../index.html'); }
+      })();
+    </script>
+  </body>
+</html>
