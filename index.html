@@ -1,1 +1,73 @@
+<!doctype html>
+<!--
+  Landing page for EventSync Pro
+  - This file contains semantic sections: header, main (hero + features) and footer.
+  - Styles are loaded from `app/css/style.css`.
+  - Links point to the static pages under `app/pages/` (login / register).
+  Keep markup simple: no inline styles or scripts here — all visual rules live in the stylesheet.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EventSync Pro — Landing</title>
+    <!-- Centralized stylesheet for layout, components and responsive rules -->
+    <link rel="stylesheet" href="app/css/style.css">
+  </head>
+  <body>
+    <!-- Header / top navigation: brand + quick links -->
+    <header class="site-header" role="banner">
+      <div class="logo" aria-label="EventSync Pro logo">EventSync Pro</div>
+      <nav class="nav-links" role="navigation" aria-label="Primary">
+        <!-- Use clear text links for progressive enhancement and SEO -->
+        <a href="app/pages/login.html">Sign In</a>
+        <a href="app/pages/register.html" class="cta">Register</a>
+      </nav>
+    </header>
 
+    <!-- Main content: hero (marketing) and feature list -->
+    <main>
+      <!-- Hero section: headline, description and primary CTAs -->
+      <section class="hero" role="region" aria-label="Hero">
+        <div class="hero-left">
+          <!-- Headline emphasizes the product benefit (matches reference) -->
+          <h1>Event Management & Attendance Control</h1>
+          <p class="lead">Organize, sync and track attendees effortlessly with a modern dashboard.</p>
+
+          <!-- Call-to-action row: primary action first -->
+          <div class="cta-row">
+            <!-- Keep class names semantic (CSS controls appearance) -->
+            <a class="login-button" href="app/pages/login.html">Get Started</a>
+            <a class="register-attendee-link" href="app/pages/login.html">Sign In</a>
+          </div>
+        </div>
+
+        <!-- Hero visual placeholder: replace with a screenshot or SVG when available -->
+        <div class="hero-right" aria-hidden="true">Preview</div>
+      </section>
+
+      <!-- Features grid: short benefit-driven cards (three columns on wide screens) -->
+      <section class="features" role="region" aria-label="Features">
+        <article class="feature-card">
+          <h3 class="feature-title">Easy Scheduling</h3>
+          <p class="feature-desc">Plan events and manage sessions in a few clicks.</p>
+        </article>
+
+        <article class="feature-card">
+          <h3 class="feature-title">Attendance</h3>
+          <p class="feature-desc">Real-time check-in and analytics.</p>
+        </article>
+
+        <article class="feature-card">
+          <h3 class="feature-title">Reports</h3>
+          <p class="feature-desc">Export attendance and engagement reports.</p>
+        </article>
+      </section>
+    </main>
+
+    <!-- Footer: copyright and small notes -->
+    <footer class="site-footer" role="contentinfo">
+      <div>© 2025 EventSync Pro</div>
+    </footer>
+  </body>
+</html>
