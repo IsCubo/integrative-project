@@ -3,9 +3,6 @@ from flask_cors import CORS
 import qrcode
 import os
 import uuid
-from database import create_connection
-
-connection = create_connection()
 
 app = Flask(__name__)
 CORS(app)
@@ -35,62 +32,25 @@ def generate_qr():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-@app.route('/api/user/register', methods=['POST'])
-def register_user():
-    """
-    Register a new user.
-    """
-    cursor = None
-    try:
-        data = request.json
-        username = data.get('username')
-        email = data.get('email')
-        role = data.get('role')
-        password = data.get('password')
 
-        cursor = connection.cursor()
-        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
-        existing_user = cursor.fetchone()
+# @app.route('/api/user/register', methods=['POST'])
+# def register_user():
+#     """
+#     Register a new user.
+#     """
+#     try:
+#         data = request.json
+#         username = data.get('username')
+#         email = data.get('email')
+#         role = data.get('role')
+#         password = data.get('password')
 
-        if existing_user:
-            return jsonify({'error': 'User already exists'}), 400
+#         if not username or not password:
+#             return jsonify({'error': 'Username and password are required'}), 400
 
-        cursor.execute("INSERT INTO users (username, email, role, password) VALUES (%s, %s, %s, %s)",
-                       (username, email, role, password))
-        connection.commit()
-
-        return jsonify({'message': 'User registered successfully'}), 201
-
-    except Exception as e:
-        connection.rollback()
-        return jsonify({'error': str(e)}), 500
-    finally:
-        if cursor:
-            cursor.close()
-
-@app.route('/api/user/login', methods=['POST'])
-def login_user():
-    cursor = None
-    try:
-        data = request.json
-        email = data.get('email')
-        password = data.get('password')
-
-        cursor = connection.cursor()
-        cursor.execute("SELECT * FROM users WHERE email = %s AND password = %s", (email, password))
-        user = cursor.fetchone()
-        if user:
-            return jsonify({'message': 'Login successful'}), 200
-        else:
-            return jsonify({'error': 'Invalid email or password'}), 401
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    finally:
-        if cursor:
-            cursor.close()
-
-
+#         return jsonify({'message': 'User registered successfully'}), 201
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
