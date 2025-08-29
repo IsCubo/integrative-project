@@ -18,11 +18,63 @@ os.makedirs(QR_FOLDER, exist_ok=True)
 
 @app.route('/api/event/register_user', methods=['POST'])
 def register_user_events():
-    """
-    Register a user for an event:
-    - Generates a unique QR code.
-    - Saves it to the database.
-    - Returns the path of the generated QR code.
+    """Register a user for an event.
+    ---
+    summary: Register a user for an event and generate a QR code
+    tags:
+      - Event Registration
+    consumes:
+      - application/json
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            user_id:
+              type: integer
+              example: 123
+            event_id:
+              type: integer
+              example: 456
+    responses:
+      200:
+        description: User registered successfully, QR code generated
+        schema:
+          type: object
+          properties:
+            status:
+              type: string
+              example: success
+            message:
+              type: string
+              example: "✅ Usuario registrado con éxito"
+            qr_code:
+              type: string
+              example: "123-456-uuid"
+            qr_path:
+              type: string
+              example: "qr_codes/uuid.png"
+      400:
+        description: Missing required data
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Faltan datos obligatorios"
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            status:
+              type: string
+              example: error
+            message:
+              type: string
+              example: "Database error"
     """
     cursor = None
     try:
@@ -65,11 +117,68 @@ def register_user_events():
 
 @app.route('/api/validate_qr', methods=['POST'])
 def validate_qr():
-    """
-    Valida un QR en el check-in:
-    - Verifica si existe en la BD.
-    - Revisa si ya fue usado.
-    - Marca la entrada si es válido.
+    """Validate a QR code at event check-in.
+    ---
+    summary: Validate QR code for event check-in
+    tags:
+      - Event Registration
+    consumes:
+      - application/json
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            qr_code:
+              type: string
+              example: "123-456-uuid"
+    responses:
+      200:
+        description: Check-in successful
+        schema:
+          type: object
+          properties:
+            status:
+              type: string
+              example: success
+            message:
+              type: string
+              example: "✅ Check-in exitoso para usuario 123"
+      400:
+        description: QR already used or missing
+        schema:
+          type: object
+          properties:
+            status:
+              type: string
+              example: error
+            message:
+              type: string
+              example: "⚠️ QR ya fue usado"
+      404:
+        description: QR not found
+        schema:
+          type: object
+          properties:
+            status:
+              type: string
+              example: error
+            message:
+              type: string
+              example: "❌ QR no encontrado"
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            status:
+              type: string
+              example: error
+            message:
+              type: string
+              example: "Database error"
     """
     cursor = None
     try:
@@ -112,8 +221,57 @@ def validate_qr():
 
 @app.route('/api/user/register', methods=['POST'])
 def register_user():
-    """
-    Register a new user.
+    """Register a new user.
+    ---
+    summary: Register a new user
+    tags:
+      - User
+    consumes:
+      - application/json
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            full_name:
+              type: string
+              example: "John Doe"
+            email:
+              type: string
+              example: "john@example.com"
+            role:
+              type: integer
+              example: 2
+            password:
+              type: string
+              example: "password123"
+    responses:
+      201:
+        description: User registered successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "User registered successfully"
+      400:
+        description: User already exists
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "User already exists"
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Database error"
     """
     cursor = None
     try:
@@ -146,9 +304,51 @@ def register_user():
 
 @app.route('/api/user/login', methods=['POST'])
 def login_user():
-    """
-    Login a user. if the user exists in the database, return a success message.
-    else return an error message.
+    """Login a user.
+    ---
+    summary: Login a user
+    tags:
+      - User
+    consumes:
+      - application/json
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              example: "john@example.com"
+            password:
+              type: string
+              example: "password123"
+    responses:
+      200:
+        description: Login successful
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Login successful"
+      401:
+        description: Invalid email or password
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Invalid email or password"
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Database error"
     """
     cursor = None
     try:
@@ -172,9 +372,51 @@ def login_user():
 
 @app.route('/api/user/<int:id_user>', methods=['GET'])
 def get_user(id_user):
-    """
-    Get user information by user ID. receive user ID as a path parameter.
-    and return user information.
+    """Get user information by user ID.
+    ---
+    summary: Get user information by user ID
+    tags:
+      - User
+    parameters:
+      - in: path
+        name: id_user
+        type: integer
+        required: true
+        example: 123
+    responses:
+      200:
+        description: User information
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 123
+            full_name:
+              type: string
+              example: "John Doe"
+            email:
+              type: string
+              example: "john@example.com"
+            role:
+              type: integer
+              example: 2
+      404:
+        description: User not found
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "User not found"
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Database error"
     """
     cursor = None
     try:
@@ -194,8 +436,39 @@ def get_user(id_user):
 
 @app.route('/api/users', methods=['GET'])
 def get_all_users():
-    """
-    Get a list of all users.
+    """Get a list of all users.
+    ---
+    summary: Get all users
+    tags:
+      - User
+    responses:
+      200:
+        description: List of users
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 123
+              full_name:
+                type: string
+                example: "John Doe"
+              email:
+                type: string
+                example: "john@example.com"
+              role:
+                type: integer
+                example: 2
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Database error"
     """
     cursor = None
     try:
@@ -210,29 +483,76 @@ def get_all_users():
         if cursor:
             cursor.close()
 
-@app.route('/api/user/<int:id_user>', methods=['PATCH'])
+@app.route('/api/user/<int:id_user>', methods=['PUT'])
 def update_user(id_user):
-    """
-    Update user information by user ID. receive the user ID as a path 
-    parameter and the updated data in the request body.
+    """Update user information.
+    ---
+    summary: Update user information
+    tags:
+      - User
+    consumes:
+      - application/json
+    parameters:
+      - in: path
+        name: id_user
+        type: integer
+        required: true
+        example: 123
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            full_name:
+              type: string
+              example: "John Doe"
+            email:
+              type: string
+              example: "john@example.com"
+            role:
+              type: integer
+              example: 2
+    responses:
+      200:
+        description: User updated successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "User updated successfully"
+      404:
+        description: User not found
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "User not found"
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Database error"
     """
     cursor = None
     try:
         data = request.json
+        full_name = data.get('full_name')
         email = data.get('email')
         role = data.get('role')
-        password = data.get('password')
 
         cursor = connection.cursor()
-        cursor.execute("UPDATE users SET email = %s, role = %s, password = %s WHERE id = %s AND is_active = TRUE",
-                       (email, role, password, id_user))
+        cursor.execute("UPDATE users SET full_name = %s, email = %s, role = %s WHERE id = %s AND is_active = TRUE",
+                       (full_name, email, role, id_user))
 
-        user = cursor.fetchone()
-        if user:
-            connection.commit()
-            return jsonify({'message': 'User updated successfully'}), 200
+        connection.commit()
 
-        return jsonify({'error': 'User not found'}), 404
+        return jsonify({'message': 'User updated successfully'}), 200
 
     except Exception as e:
         connection.rollback()
@@ -241,10 +561,44 @@ def update_user(id_user):
         if cursor:
             cursor.close()
 
-@app.route('/api/user/delete/<int:id_user>', methods=['PATCH'])
+@app.route('/api/user/<int:id_user>', methods=['DELETE'])
 def delete_user(id_user):
-    """
-    Delete a user by user ID. receive user ID as a path parameter.
+    """Delete a user.
+    ---
+    summary: Delete a user
+    tags:
+      - User
+    parameters:
+      - in: path
+        name: id_user
+        type: integer
+        required: true
+        example: 123
+    responses:
+      200:
+        description: User deleted successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "User deleted successfully"
+      404:
+        description: User not found
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "User not found"
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Database error"
     """
     cursor = None
     try:
@@ -263,8 +617,39 @@ def delete_user(id_user):
 
 @app.route('/api/events', methods=['GET'])
 def get_events():
-    """
-    Get a list of all events.
+    """Get a list of all events.
+    ---
+    summary: Get all events
+    tags:
+      - Event
+    responses:
+      200:
+        description: List of events
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              name:
+                type: string
+                example: "Tech Conference"
+              date:
+                type: string
+                example: "2024-09-15"
+              description:
+                type: string
+                example: "Annual tech conference"
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Database error"
     """
     cursor = None
     try:
@@ -306,8 +691,51 @@ def get_events():
 
 @app.route('/api/event/<int:id_event>', methods=['GET'])
 def get_event(id_event):
-    """
-    Get event details by event ID.
+    """Get event information by event ID.
+    ---
+    summary: Get event information by event ID
+    tags:
+      - Event
+    parameters:
+      - in: path
+        name: id_event
+        type: integer
+        required: true
+        example: 1
+    responses:
+      200:
+        description: Event information
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: "Tech Conference"
+            date:
+              type: string
+              example: "2024-09-15"
+            description:
+              type: string
+              example: "Annual tech conference"
+      404:
+        description: Event not found
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Event not found"
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Database error"
     """
     cursor = None
     try:
@@ -348,14 +776,72 @@ def get_event(id_event):
         if cursor:
             cursor.close()
 
-@app.route('/api/event/<int:id_event>', methods=['PATCH'])
+@app.route('/api/event/<int:id_event>', methods=['PUT'])
 def update_event(id_event):
+    """Update event information.
+    ---
+    summary: Update event information
+    tags:
+      - Event
+    consumes:
+      - application/json
+    parameters:
+      - in: path
+        name: id_event
+        type: integer
+        required: true
+        example: 1
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              example: "Tech Conference 2024"
+            date:
+              type: string
+              example: "2024-09-16"
+            description:
+              type: string
+              example: "The biggest tech conference"
+    responses:
+      200:
+        description: Event updated successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Event updated successfully"
+      404:
+        description: Event not found
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Event not found"
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Database error"
     """
-    Update an event by event ID.
-    """
-    data = request.get_json()
     cursor = None
     try:
+        data = request.json
+        name = data.get('name')
+        date_time = data.get('date_time')
+        capacity = data.get('capacity')
+        description = data.get('description')
+        id_category = data.get('id_category')
+        id_location = data.get('id_location')
+
         cursor = connection.cursor()
         cursor.execute("""
                         UPDATE events
@@ -366,7 +852,7 @@ def update_event(id_event):
                             id_category = %s,
                             id_location = %s
                         WHERE id = %s
-                        """, (data['name'], data['date_time'], data['capacity'], data['description'], data['id_category'], data['id_location'], id_event))
+                        """, (name, date_time, capacity, description, id_category, id_location, id_event))
         connection.commit()
 
         return jsonify({'message': 'Event updated successfully'}), 200
@@ -380,8 +866,42 @@ def update_event(id_event):
 
 @app.route('/api/event/<int:id_event>', methods=['DELETE'])
 def delete_event(id_event):
-    """
-    Delete an event by event ID.
+    """Delete an event.
+    ---
+    summary: Delete an event
+    tags:
+      - Event
+    parameters:
+      - in: path
+        name: id_event
+        type: integer
+        required: true
+        example: 1
+    responses:
+      200:
+        description: Event deleted successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Event deleted successfully"
+      404:
+        description: Event not found
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Event not found"
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Database error"
     """
     cursor = None
     try:
@@ -406,21 +926,63 @@ def delete_event(id_event):
 
 @app.route('/api/event', methods=['POST'])
 def create_event():
+    """Create a new event.
+    ---
+    summary: Create a new event
+    tags:
+      - Event
+    consumes:
+      - application/json
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              example: "New Tech Conference"
+            date:
+              type: string
+              example: "2024-10-20"
+            description:
+              type: string
+              example: "A brand new tech conference"
+    responses:
+      201:
+        description: Event created successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Event created successfully"
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Database error"
     """
-    Create a new event.
-    """
-    data = request.get_json()
     cursor = None
     try:
+        data = request.json
+        name = data.get('name')
+        date_time = data.get('date_time')
+        capacity = data.get('capacity')
+        description = data.get('description')
+        id_category = data.get('id_category')
+        id_location = data.get('id_location')
+
         cursor = connection.cursor()
         cursor.execute("""
                         INSERT INTO events (name, date_time, capacity, description, id_category, id_location)
                         VALUES (%s, %s, %s, %s, %s, %s)
-                        """, (data['name'], data['date_time'], data['capacity'], data['description'], data['id_category'], data['id_location']))
+                        """, (name, date_time, capacity, description, id_category, id_location))
         connection.commit()
-
-        if cursor.rowcount == 0:
-            return jsonify({'error': 'Event could not be created'}), 400
 
         return jsonify({'message': 'Event created successfully'}), 201
 
@@ -431,23 +993,62 @@ def create_event():
         if cursor:
             cursor.close()
 
-@app.route('/api/ticket/create', methods=['POST'])
+@app.route('/api/ticket', methods=['POST'])
 def create_ticket():
+    """Create a new ticket.
+    ---
+    summary: Create a new ticket
+    tags:
+      - Ticket
+    consumes:
+      - application/json
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            id_event:
+              type: integer
+              example: 1
+            id_user:
+              type: integer
+              example: 123
+            price:
+              type: number
+              example: 50.00
+    responses:
+      201:
+        description: Ticket created successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Ticket created successfully"
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Database error"
     """
-    Create a new ticket. Requires event ID, user ID, quantity, and QR code.
-    """
-    data = request.get_json()
     cursor = None
     try:
+        data = request.json
+        id_event = data.get('id_event')
+        id_user = data.get('id_user')
+        price = data.get('price')
+
         cursor = connection.cursor()
         cursor.execute("""
-                        INSERT INTO tickets (id_event, id_user, quantity, QR)
-                        VALUES (%s, %s, %s, %s)
-                        """, (data['id_event'], data['id_user'], data['quantity'], data['QR']))
+                        INSERT INTO tickets (id_event, id_user, price)
+                        VALUES (%s, %s, %s)
+                        """, (id_event, id_user, price))
         connection.commit()
-
-        if cursor.rowcount == 0:
-            return jsonify({'error': 'Ticket could not be created'}), 400
 
         return jsonify({'message': 'Ticket created successfully'}), 201
 
