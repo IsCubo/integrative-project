@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EventSync Pro - Register</title>
+    <!-- Usamos la hoja global principal (ya centralizada) -->
+    <link rel="stylesheet" href="../css/style.css">
+  </head>
+  <body>
+    <!-- Contenedor principal centrado para la UI de registro -->
+    <main class="register-page">
+      <header class="register-header">
+        <div class="brand">
+          <span class="logo">EventSync Pro</span>
+          <p class="brand-sub">Register for Event & get your QR code</p>
+        </div>
+        <nav class="small-nav">
+          <a href="/">Home</a>
+          <a href="/app/pages/login.html" class="cta">Sign in</a>
+        </nav>
+      </header>
+
+      <section class="register-grid">
+        <!-- Columna del formulario -->
+        <div class="panel panel-form">
+          <h2 class="panel-title">Attendee Registration</h2>
+          <p class="panel-desc">Complete your registration to receive your event QR code</p>
+
+          <!-- Formulario: se validará y procesará con JS -->
+          <form id="registerForm" class="form" autocomplete="off">
+            <!-- Full name -->
+            <div class="form-row">
+              <label for="fullName">Full Name</label>
+              <input id="fullName" name="fullName" type="text" class="form-input" placeholder="Enter your full name" required>
+            </div>
+
+            <!-- Email -->
+            <div class="form-row">
+              <label for="email">Email Address</label>
+              <input id="email" name="email" type="email" class="form-input" placeholder="Enter your email" required>
+            </div>
+
+            <!-- Role select -->
+            <div class="form-row">
+              <label for="role">Role</label>
+              <select id="role" name="role" class="form-select" required>
+                <option value="">Select your role</option>
+                <option>Speaker</option>
+                <option>Attendee</option>
+                <option>Sponsor</option>
+                <option>Volunteer</option>
+                <option>Press</option>
+              </select>
+            </div>
+
+            <!-- Event select: opciones reales de ejemplo -->
+            <div class="form-row">
+              <label for="event">Select Event</label>
+              <select id="event" name="event" class="form-select" required>
+                <option value="">Choose an event</option>
+                <option>Tech Conference 2025 - 14/9/2025</option>
+                <option>Marketing Workshop - 19/9/2025</option>
+                <option>Design Summit - 25/10/2025</option>
+              </select>
+            </div>
+
+            <!-- Botón principal -->
+            <div class="form-row">
+              <button id="submitBtn" type="submit" class="btn btn-primary btn-lg">Register & Get QR</button>
+            </div>
+          </form>
+
+          <!-- Link pequeño para volver al login -->
+          <div class="centered small-note">
+            <a href="/app/pages/login.html">Already have an account? Sign in</a>
+          </div>
+        </div>
+
+        <!-- Columna derecha: preview / ayuda visual que recuerda la tarjeta con QR -->
+        <aside class="panel panel-preview">
+          <div class="qr-card">
+            <div class="qr-placeholder">
+              <!-- Canvas donde el JS pintará un QR mock si el registro fue correcto -->
+              <canvas id="qrPreview" width="220" height="220" aria-hidden="true"></canvas>
+            </div>
+            <p class="qr-note">QR preview will appear here after registering.</p>
+          </div>
+
+          <div class="help-list">
+            <h4 class="feature-title">What you get</h4>
+            <p class="feature-desc">A unique event QR code you can show at entry. The QR image is downloadable on the confirmation screen.</p>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <!-- Script de comportamiento: procesa el formulario y genera un QR visual en el cliente -->
+    <script src="/app/js/register.js"></script>
+  </body>
+</html>
