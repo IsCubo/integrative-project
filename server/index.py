@@ -14,16 +14,15 @@ CORS(app)
 QR_FOLDER = 'qr_codes'
 os.makedirs(QR_FOLDER, exist_ok=True)
 
-
-
-@app.route('/api/register_user', methods=['POST'])
-def register_user():
+@app.route('/api/event/register_user', methods=['POST'])
+def register_user_events():
     """
     Register a user for an event:
     - Generates a unique QR code.
     - Saves it to the database.
     - Returns the path of the generated QR code.
     """
+    cursor = None
     try:
         data = request.json
         user_id = data.get("user_id")
@@ -70,6 +69,7 @@ def validate_qr():
     - Revisa si ya fue usado.
     - Marca la entrada si es válido.
     """
+    cursor = None
     try:
         data = request.json
         qr_data = data.get("qr_code")
