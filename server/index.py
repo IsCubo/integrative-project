@@ -4,6 +4,7 @@ import qrcode
 import os
 import uuid
 from database import create_connection
+from datetime import datetime
 
 connection = create_connection()
 
@@ -14,27 +15,99 @@ QR_FOLDER = 'qr_codes'
 os.makedirs(QR_FOLDER, exist_ok=True)
 
 
-@app.route('/api/generate_qr', methods=['POST'])
-def generate_qr():
+
+@app.route('/api/register_user', methods=['POST'])
+def register_user():
     """
-    Generate a QR code from the provided text.
-    Then save it to a file and return the file path.
+    Register a user for an event:
+    - Generates a unique QR code.
+    - Saves it to the database.
+    - Returns the path of the generated QR code.
     """
     try:
         data = request.json
-        text = data.get('text')
-        if not text:
-            return jsonify({'error': 'No text provided'}), 400
+        user_id = data.get("user_id")
+        event_id = data.get("event_id")
 
+        if not user_id or not event_id:
+            return jsonify({"error": "Faltan datos obligatorios"}), 400
+
+        # Generar QR único (ej: user-event-uuid)
+        qr_code = f"{user_id}-{event_id}-{uuid.uuid4()}"
         filename = f"{uuid.uuid4()}.png"
         filepath = os.path.join(QR_FOLDER, filename)
-        img = qrcode.make(text)
+
+        # Crear imagen QR
+        img = qrcode.make(qr_code)
         img.save(filepath)
 
-        return jsonify({'qr_path': filepath})
+        # Guardar en la BD
+        cursor = connection.cursor()
+        sql = """
+        INSERT INTO event_registrations (user_id, event_id, qr_code, checked_in, registration_time)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+        values = (user_id, event_id, qr_code, False, datetime.now())
+        cursor.execute(sql, values)
+        connection.commit()
+        cursor.close()
+
+        return jsonify({
+            "status": "success",
+            "message": "✅ Usuario registrado con éxito",
+            "qr_code": qr_code,
+            "qr_path": filepath
+        }), 200
+
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/validate_qr', methods=['POST'])
+def validate_qr():
+    """
+    Valida un QR en el check-in:
+    - Verifica si existe en la BD.
+    - Revisa si ya fue usado.
+    - Marca la entrada si es válido.
+    """
+    try:
+        data = request.json
+        qr_data = data.get("qr_code")
+
+        if not qr_data:
+            return jsonify({"error": "No se recibió código QR"}), 400
+
+        cursor = connection.cursor(dictionary=True)
+        sql = "SELECT * FROM event_registrations WHERE qr_code = %s"
+        cursor.execute(sql, (qr_data,))
+        record = cursor.fetchone()
+
+        if not record:
+            cursor.close()
+            return jsonify({"status": "error", "message": "❌ QR no encontrado"}), 404
+
+        if record["checked_in"]:
+            cursor.close()
+            return jsonify({"status": "error", "message": "⚠️ QR ya fue usado"}), 400
+
+        # Actualizar a check-in hecho
+        update_sql = """
+        UPDATE event_registrations
+        SET checked_in = %s, checkin_time = %s
+        WHERE qr_code = %s
+        """
+        cursor.execute(update_sql, (True, datetime.now(), qr_data))
+        connection.commit()
+        cursor.close()
+
+        return jsonify({
+            "status": "success",
+            "message": f"✅ Check-in exitoso para usuario {record['user_id']}"
+        }), 200
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/api/user/register', methods=['POST'])
 def register_user():
     """
