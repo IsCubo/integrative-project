@@ -5,10 +5,12 @@ import os
 import uuid
 from database import create_connection
 from datetime import datetime
+from flasgger import Swagger, swag_from
 
 connection = create_connection()
 
 app = Flask(__name__)
+swagger = Swagger(app)
 CORS(app)
 
 QR_FOLDER = 'qr_codes'
@@ -239,7 +241,7 @@ def update_user(id_user):
         if cursor:
             cursor.close()
 
-@app.route('/api/user/<int:id_user>', methods=['PATCH'])
+@app.route('/api/user/delete/<int:id_user>', methods=['PATCH'])
 def delete_user(id_user):
     """
     Delete a user by user ID. receive user ID as a path parameter.

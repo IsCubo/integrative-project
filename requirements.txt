@@ -5,3 +5,4 @@ pillow==11.3.0
 python-dotenv==0.19.0
 qrcode==6.1
 requests==2.26.0
+Flasgger==0.9.7.1
