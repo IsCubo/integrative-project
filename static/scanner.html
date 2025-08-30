@@ -1,1 +1,43 @@
-<h1>hola</h1>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QR Check-in Scanner</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+  <h2>Scan your QR to Check-in</h2>
+  <div id="reader" style="width:300px;"></div>
+  <h3 id="result"></h3>
+
+  <script>
+    /**
+     * Callback when a QR code is detected successfully.
+     * Sends the QR data to the backend for validation.
+     */
+    function onScanSuccess(decodedText, decodedResult) {
+      console.log(`QR detected: ${decodedText}`);
+      
+      // Send QR data to backend Flask API
+      fetch('/validate_qr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ qr_data: decodedText })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const resultBox = document.getElementById("result");
+        resultBox.innerHTML = data.message;
+        resultBox.style.color = data.status === "success" ? "green" : "red";
+      });
+    }
+
+    // Initialize the QR scanner with the back camera
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" }, // Use back camera
+      { fps: 10, qrbox: 250 },
+      onScanSuccess
+    );
+  </script>
+</body>
+</html>
