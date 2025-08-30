@@ -6,6 +6,7 @@ import uuid
 from database import create_connection
 from datetime import datetime
 from flasgger import Swagger, swag_from
+import bcrypt
 
 connection = create_connection()
 
@@ -281,6 +282,9 @@ def register_user():
         role = data.get('role')
         password = data.get('password')
 
+        if not full_name or not email or not role or not password:
+            return jsonify({'error': 'Faltan datos obligatorios'}), 400
+
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         existing_user = cursor.fetchone()
@@ -288,8 +292,11 @@ def register_user():
         if existing_user:
             return jsonify({'error': 'User already exists'}), 400
 
+        # Hash de la contraseña antes de guardarla
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
         cursor.execute("INSERT INTO users (full_name, email, password, id_role) VALUES (%s, %s, %s, %s)",
-                       (full_name, email, password, role))
+                       (full_name, email, hashed_password, role)) # Guardar la contraseña hasheada
 
         connection.commit()
 
@@ -356,13 +363,21 @@ def login_user():
         email = data.get('email')
         password = data.get('password')
 
-        cursor = connection.cursor()
-        cursor.execute("SELECT * FROM users WHERE email = %s AND password = %s AND is_active = TRUE", (email, password))
+        if not email or not password:
+            return jsonify({'error': 'Faltan datos obligatorios'}), 400
+
+        cursor = connection.cursor(dictionary=True) # Usar dictionary=True para acceder por nombre de columna
+        cursor.execute("SELECT id, full_name, email, password, id_role, is_active FROM users WHERE email = %s", (email,))
         user = cursor.fetchone()
-        if user:
-            return jsonify({'message': 'Login successful'}), 200
+
+        if user and user['is_active']:
+            # Verificar la contraseña proporcionada con el hash almacenado
+            if bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+                return jsonify({'message': 'Login successful'}), 200
+            else:
+                return jsonify({'error': 'Invalid email or password'}), 401
         else:
-            return jsonify({'error': 'Invalid email or password'}), 401
+            return jsonify({'error': 'Invalid email or password'}), 401 # O "User not found" si quieres ser más específico
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
