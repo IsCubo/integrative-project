@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import qrcode
 import os
@@ -7,21 +7,53 @@ from database import create_connection
 from datetime import datetime
 from flasgger import Swagger, swag_from
 import bcrypt
+from dotenv import load_dotenv
+from email_utils import send_registration_email 
+
+load_dotenv()
 
 connection = create_connection()
 
-app = Flask(__name__)
+basedir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+static_folder_path = os.path.join(basedir, 'static')  
+
+app = Flask(__name__, static_folder=static_folder_path)
 swagger = Swagger(app)
 CORS(app)
 
 QR_FOLDER = 'qr_codes'
 os.makedirs(QR_FOLDER, exist_ok=True)
 
+@app.route("/")
+def home():
+    """
+    Home route to verify the server is running.
+    ---
+    responses:
+      200:
+        description: HTML response indicating server is running
+        schema:
+          type: string
+          example: "<h2>QR Check-in App Running 🚀</h2><a href='/scanner'>Go to Scanner</a>"
+    """
+    return "<h2>QR Check-in App Running 🚀</h2><a href='/scanner'>Go to Scanner</a>"
+
+@app.route("/scanner")
+def scanner():
+    """
+    Render the QR scanner HTML page.
+    ---
+    responses:
+      200:
+        description: HTML content of the scanner page
+    """
+    return send_from_directory(app.static_folder, "scanner.html")
+
 @app.route('/api/event/register_user', methods=['POST'])
 def register_user_events():
     """Register a user for an event.
     ---
-    summary: Register a user for an event and generate a QR code
+    summary: Register a user for an event and generate a QR code, then send confirmation email
     tags:
       - Event Registration
     consumes:
@@ -41,7 +73,7 @@ def register_user_events():
               example: 456
     responses:
       200:
-        description: User registered successfully, QR code generated
+        description: User registered successfully, QR code generated, email sent
         schema:
           type: object
           properties:
@@ -50,7 +82,24 @@ def register_user_events():
               example: success
             message:
               type: string
-              example: "✅ Usuario registrado con éxito"
+              example: "✅ Usuario registrado con éxito y correo enviado"
+            qr_code:
+              type: string
+              example: "123-456-uuid"
+            qr_path:
+              type: string
+              example: "qr_codes/uuid.png"
+      202:
+        description: User registered, but email failed to send
+        schema:
+          type: object
+          properties:
+            status:
+              type: string
+              example: warning
+            message:
+              type: string
+              example: "⚠️ Usuario registrado con éxito, pero falló el envío del correo."
             qr_code:
               type: string
               example: "123-456-uuid"
@@ -65,6 +114,14 @@ def register_user_events():
             error:
               type: string
               example: "Faltan datos obligatorios"
+      404:
+        description: User or Event not found
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Usuario o Evento no encontrado"
       500:
         description: Internal server error
         schema:
@@ -84,37 +141,80 @@ def register_user_events():
         event_id = data.get("event_id")
 
         if not user_id or not event_id:
-            return jsonify({"error": "Faltan datos obligatorios"}), 400
+            return jsonify({"error": "Faltan datos obligatorios (user_id, event_id)"}), 400
+
+        cursor = connection.cursor(dictionary=True)
+
+        # 1. Obtener datos del usuario para el email
+        cursor.execute("SELECT full_name, email FROM users WHERE id = %s AND is_active = TRUE", (user_id,))
+        user_data = cursor.fetchone()
+        if not user_data:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+        user_name = user_data['full_name']
+        user_email = user_data['email']
+
+        # 2. Obtener datos del evento para el email
+        cursor.execute("SELECT name FROM events WHERE id = %s", (event_id,))
+        event_data = cursor.fetchone()
+        if not event_data:
+            return jsonify({"error": "Evento no encontrado"}), 404
+        event_name = event_data['name']
+
+        # Verificar si el usuario ya está registrado para este evento
+        cursor.execute("SELECT id FROM event_registrations WHERE user_id = %s AND event_id = %s", (user_id, event_id))
+        existing_registration = cursor.fetchone()
+        if existing_registration:
+            return jsonify({"status": "error", "message": "⚠️ El usuario ya está registrado para este evento"}), 400
 
         # Generar QR único (ej: user-event-uuid)
-        qr_code = f"{user_id}-{event_id}-{uuid.uuid4()}"
+        qr_code_data = f"{user_id}-{event_id}-{uuid.uuid4()}"
         filename = f"{uuid.uuid4()}.png"
         filepath = os.path.join(QR_FOLDER, filename)
 
         # Crear imagen QR
-        img = qrcode.make(qr_code)
+        img = qrcode.make(qr_code_data)
         img.save(filepath)
 
         # Guardar en la BD
-        cursor = connection.cursor()
         sql = """
         INSERT INTO event_registrations (user_id, event_id, qr_code, checked_in, registration_time)
         VALUES (%s, %s, %s, %s, %s)
         """
-        values = (user_id, event_id, qr_code, False, datetime.now())
+        values = (user_id, event_id, qr_code_data, False, datetime.now())
         cursor.execute(sql, values)
         connection.commit()
-        cursor.close()
 
-        return jsonify({
-            "status": "success",
-            "message": "✅ Usuario registrado con éxito",
-            "qr_code": qr_code,
-            "qr_path": filepath
-        }), 200
+        # Enviar correo de confirmación
+        email_sent = send_registration_email(
+            to_email=user_email,
+            user_name=user_name,
+            event_name=event_name,
+            qr_code_data=qr_code_data,
+            qr_image_path=filepath # Pasamos la ruta de la imagen QR
+        )
+
+        if email_sent:
+            return jsonify({
+                "status": "success",
+                "message": "✅ Usuario registrado con éxito y correo de confirmación enviado",
+                "qr_code": qr_code_data,
+                "qr_path": filepath
+            }), 200
+        else:
+            # Aunque el email falle, el registro en DB fue exitoso. Devolver un 202 Accepted o 200 con advertencia.
+            return jsonify({
+                "status": "warning",
+                "message": "⚠️ Usuario registrado con éxito, pero falló el envío del correo de confirmación.",
+                "qr_code": qr_code_data,
+                "qr_path": filepath
+            }), 202 # Accepted but with warning
 
     except Exception as e:
+        connection.rollback() # Asegurarse de revertir la transacción si algo falla
         return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
 
 @app.route('/api/validate_qr', methods=['POST'])
 def validate_qr():
