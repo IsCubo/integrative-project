@@ -1,0 +1,50 @@
+/* Base: reset, variables, tipografía y utilidades */
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#0078ff;
+  --primary-dark:#005fcf;
+  --bg:#ffffff;
+  --muted:#6b7280;
+  --text:#0f1724;
+  --surface:#f8fafc;
+  --border:#e6eef7;
+  --radius:10px;
+  --radius-sm:6px;
+  --shadow-sm:0 4px 18px rgba(15,23,36,0.06);
+  --shadow-lg:0 12px 40px rgba(15,23,36,0.08);
+  --gap:1rem;
+  --container-max:1200px;
+  --transition:200ms ease;
+  --font-system: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+html,body{height:100%;width:100%}
+body{
+  font-family:var(--font-system);
+  color:var(--text);
+  background:var(--surface);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.5;
+  font-size:16px;
+}
+
+.container{
+  width:100%;
+  max-width:var(--container-max);
+  margin:0 auto;
+  padding:0 20px;
+}
+
+h1,h2,h3{font-weight:700}
+p{color:var(--muted)}
+
+.img-responsive{max-width:100%;height:auto;display:block}
+
+/* Simple helpers */
+.flex{display:flex}
+.center{display:flex;align-items:center;justify-content:center}
+.stack{display:flex;flex-direction:column;gap:var(--gap)}
+.hide-on-mobile{display:block}
+@media (max-width:767px){.hide-on-mobile{display:none}}

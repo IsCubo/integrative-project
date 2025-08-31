@@ -1,0 +1,49 @@
+/* Styles for CSS-only auth tabs */
+
+.tabs { position:relative; }
+.tabs input{ display:none; }
+
+/* labels as tabs */
+.tabs-labels{ display:flex; gap:20px; justify-content:center; margin-bottom:18px; }
+.tabs-labels label{
+  padding:8px 12px; cursor:pointer; border-bottom:3px solid transparent;
+  font-weight:600; color:var(--muted);
+}
+#tab-login:checked ~ .tabs-labels label[for="tab-login"],
+#tab-register:checked ~ .tabs-labels label[for="tab-register"]{
+  color:var(--primary); border-color:var(--primary);
+}
+
+/* Panels */
+.tabs-panels{ min-height:200px; }
+.panel{ display:none; }
+#tab-login:checked ~ .tabs-panels #panel-login,
+#tab-register:checked ~ .tabs-panels #panel-register{
+  display:block;
+}
+
+/* minor spacing for inputs inside panel */
+.panel .form-input{ margin-bottom:12px; }
+
+/* link-like labels styling */
+.link-like{ text-decoration:underline; }
+
+/* Responsive tweak */
+@media(max-width:480px){
+  .tabs-labels{ gap:12px; }
+  .card{ padding:18px; }
+}
+
+/* Layout and design moved from inline styles in auth.html */
+.auth-main{padding:48px 0}
+.auth-card{max-width:520px;margin:0 auto;padding:28px}
+.auth-title{text-align:center;margin-bottom:12px}
+.auth-btn{width:100%}
+.auth-back{text-align:center;margin-top:14px;color:var(--muted);font-size:.95rem}
+.auth-cta-link{cursor:pointer;color:var(--primary)}
+
+/* Small centered note used under forms */
+.auth-note{text-align:center;margin-top:12px}
+
+/* Small utility for centered small notes in auth forms (moved from inline) */
+.auth-note{text-align:center;margin-top:12px}
