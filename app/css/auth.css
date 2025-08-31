@@ -1,7 +1,8 @@
 /* Styles for CSS-only auth tabs */
 
 .tabs { position:relative; }
-.tabs input{ display:none; }
+/* hide only the radio inputs used for the CSS-only tabs, not the form fields */
+.tabs input[type="radio"]{ display:none; }
 
 /* labels as tabs */
 .tabs-labels{ display:flex; gap:20px; justify-content:center; margin-bottom:18px; }
