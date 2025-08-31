@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>dashboard.html</title>
+  <!-- modular CSS -->
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+
+</head>
+<body>
+  <!-- Header (shared) -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="#" class="logo" aria-label="QreateFlow home">
+        <img src="../assets/icons/QreateFlow-logo-transparent.png" alt="QreateFlow logo" class="logo-img" width="36" height="36">
+        <span class="logo-text sr-only">QreateFlow</span>
+      </a>
+
+      <div class="nav-actions">
+        <span class="text-muted">Welcome, test</span>
+        <a href="#" class="btn btn-secondary">Logout</a>
+      </div>
+    </div>
+  </header>
+  <div class="site-header-placeholder"></div>
+
+  <div class="dashboard-wrap container">
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card" data-variant="blue">
+        <div class="stat-label">Available Events</div>
+        <div class="stat-value">3</div>
+      </div>
+      <div class="stat-card" data-variant="orange">
+        <div class="stat-label">In Cart</div>
+        <div class="stat-value">0</div>
+      </div>
+      <div class="stat-card" data-variant="green">
+        <div class="stat-label">My Events</div>
+        <div class="stat-value">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Checked In</div>
+        <div class="stat-value">0</div>
+      </div>
+    </div>
+
+    <!-- Tabs (JS-controlled) -->
+    <div class="tabs" role="tablist" aria-label="Dashboard tabs">
+      <button class="tab" role="tab" aria-selected="true" data-tab="available">Available Events</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="mycart">My Cart</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="myevents">My Events</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="profile">Profile</button>
+    </div>
+
+    <!-- Panels -->
+    <section id="tab-available" class="tab-panel">
+      <div class="available-events">
+        <div class="events-header">
+          <div class="title">Available Events</div>
+          <div class="events-count-badge">3 events available</div>
+        </div>
+
+        <div class="events-grid" aria-live="polite">
+          <!-- Events will be rendered here by app/js/main.js -->
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-mycart" class="tab-panel hidden" aria-hidden="true">
+      <div class="my-cart">
+        <h2>My Cart</h2>
+        <div class="cart-content">Your cart is empty.</div>
+      </div>
+    </section>
+
+    <section id="tab-myevents" class="tab-panel hidden" aria-hidden="true">
+      <div class="my-events">
+        <h2>My Events</h2>
+        <div class="events-list">You have no registered events yet.</div>
+      </div>
+    </section>
+
+    <section id="tab-profile" class="tab-panel hidden" aria-hidden="true">
+      <div class="profile">
+        <h2>Profile</h2>
+        <p class="text-muted">Profile management coming soon.</p>
+      </div>
+    </section>
+  </div>
+  <script type="module" src="../js/main.js" defer></script>
+</body>
+</html>
