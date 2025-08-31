@@ -1174,5 +1174,178 @@ def create_ticket():
         if cursor:
             cursor.close()
 
+@app.route('/api/ticket/<int:ticket_id>', methods=['GET'])
+def get_ticket(ticket_id):
+    """Get ticket details.
+    ---
+    summary: Get ticket details
+    tags:
+      - Ticket
+    parameters:
+      - in: path
+        name: ticket_id
+        required: true
+        type: integer
+    responses:
+      200:
+        description: Ticket details retrieved successfully
+        schema:
+          type: object
+          properties:
+            event_name:
+              type: string
+              example: "Concert"
+            user_name:
+              type: string
+              example: "John Doe"
+            price:
+              type: number
+              example: 50.00
+      404:
+        description: Ticket not found
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Ticket not found"
+    """
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        cursor.execute("""
+                        SELECT e.name AS event_name, u.name AS user_name, t.price
+                        FROM tickets t
+                        JOIN events e ON t.id_event = e.id
+                        JOIN users u ON t.id_user = u.id
+                        WHERE t.id = %s
+                        """, (ticket_id,))
+        ticket = cursor.fetchone()
+        if ticket:
+            return jsonify(dict(ticket)), 200
+        else:
+            return jsonify({'error': 'Ticket not found'}), 404
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+
+@app.route('/api/ticket', methods=['GET'])
+def list_tickets():
+    """List all tickets.
+    ---
+    summary: List all tickets
+    tags:
+      - Ticket
+    responses:
+      200:
+        description: Tickets retrieved successfully
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              event_name:
+                type: string
+                example: "Concert"
+              user_name:
+                type: string
+                example: "John Doe"
+              price:
+                type: number
+                example: 50.00
+      500:
+        description: Internal server error
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Database error"
+    """
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        cursor.execute("""
+                        SELECT e.name AS event_name, u.name AS user_name, t.price
+                        FROM tickets t
+                        JOIN events e ON t.id_event = e.id
+                        JOIN users u ON t.id_user = u.id
+                        """)
+        tickets = cursor.fetchall()
+        return jsonify(tickets), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+
+@app.route('/api/ticket/<int:ticket_id>', methods=['PATCH'])
+def update_ticket(ticket_id):
+    """Update ticket details.
+    ---
+    summary: Update ticket details
+    tags:
+      - Ticket
+    parameters:
+      - in: path
+        name: ticket_id
+        required: true
+        type: integer
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              event_name:
+                type: string
+                example: "Concert"
+              user_name:
+                type: string
+                example: "John Doe"
+              price:
+                type: number
+                example: 50.00
+    responses:
+      200:
+        description: Ticket updated successfully
+      404:
+        description: Ticket not found
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Ticket not found"
+    """
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        data = request.get_json()
+        cursor.execute("""
+                        UPDATE tickets
+                        SET id_event = (SELECT id FROM events WHERE name = %s),
+                            id_user = (SELECT id FROM users WHERE name = %s),
+                            price = %s
+                        WHERE id = %s
+                        """, (data['event_name'], data['user_name'], data['price'], ticket_id))
+        if cursor.rowcount:
+            connection.commit()
+            return jsonify({'message': 'Ticket updated successfully'}), 200
+        else:
+            return jsonify({'error': 'Ticket not found'}), 404
+
+    except Exception as e:
+        connection.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+
 if __name__ == '__main__':
     app.run(debug=True)
