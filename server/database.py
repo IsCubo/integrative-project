@@ -7,7 +7,7 @@ def create_connection():
             host='localhost',
             user='root',
             password='admin123',
-            database='events'
+            database='QreateFlow'
         )
 
         if connection.is_connected():
