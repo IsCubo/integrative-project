@@ -31,7 +31,7 @@ export async function loginUser(email, password) {
 }
 
 // Register user
-export async function registerUser({ username, email, role, password }) {
+export async function registerUser({ full_name, email, role, password }) {
   return request("/user/register", "POST", { full_name, email, role, password });
 }
 
