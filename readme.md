@@ -28,27 +28,59 @@ QreateFlow is a comprehensive event management system that allows users to creat
 ```
 integrative-project/
 ├── app/
+│   ├── assets/
+│   │   ├── icons/
+│   │   │   ├── QreateFlow-horizontal.png
+│   │   │   ├── QreateFlow-logo-transparent.png
+│   │   │   ├── QreateFlow-logo.png
+│   │   │   └── QreateFlow-story.png
+│   │   └── images/
+│   │       ├── photo-1569908420024-c8f709b75700.jpg
+│   │       ├── photo-1672435145383-a9f1bbcf808a.jpg
+│   │       └── photo-1722872112503-922d881bdddc.jpg
 │   ├── css/
-│   │   └── style.css
+│   │   ├── auth.css
+│   │   ├── base.css
+│   │   ├── components.css
+│   │   ├── dashboard.css
+│   │   └── landing.css
 │   ├── js/
+│   │   ├── api/
+│   │   │   └── events.js
 │   │   ├── main.js
 │   │   ├── register.js
-│   │   └── register_event.js
+│   │   ├── register_event.js
+│   │   ├── state/
+│   │   │   └── store.js
+│   │   ├── ui/
+│   │   │   ├── cart.js
+│   │   │   ├── myEvents.js
+│   │   │   ├── renderEvents.js
+│   │   │   └── tabs.js
+│   │   └── utils/
+│   │       └── format.js
 │   └── pages/
-│       ├── home.html
-│       ├── login.html
-│       ├── register.html
-│       └── register-success.html
+│       ├── auth.html
+│       ├── dashboard.html
+│       ├── landing.html
 ├── DB/
 │   ├── DB QreateFlow.sql
 │   └── Modelo Relacional.pdf
+├── qr_codes/              # Folder for generated QR images (may be empty at first)
 ├── server/
+│   ├── __pycache__/
+│   │   ├── database.cpython-310.pyc
+│   │   └── index.cpython-310.pyc
 │   ├── database.py
 │   ├── email_utils.py
 │   └── index.py
+├── static/
+│   └── scanner.html       # QR check-in scanner web page
 ├── index.html
 ├── package.json
-└── requirements.txt
+├── requirements.txt
+├── readme.md
+├── .gitignore
 ```
 
 ## 🔧 Prerequisites
